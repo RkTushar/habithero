@@ -1,4 +1,4 @@
-// File generated manually for HabitHero project.
+// File manually updated for HabitHero project.
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
@@ -29,7 +29,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCfkWN0GvdL-A2qa1ibZARc9AMuvFiukrw',
-    appId: '1:1042646575861:web:YOUR_WEB_APP_ID', // Replace this below ⬇️
+    appId: '1:1042646575861:web:ae200b2d733bb7bbd5b3bc',
     messagingSenderId: '1042646575861',
     projectId: 'habithero-e2f63',
     authDomain: 'habithero-e2f63.firebaseapp.com',
