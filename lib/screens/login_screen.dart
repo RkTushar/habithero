@@ -11,7 +11,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool isLogin = true;
-  final _auth = FirebaseAuth.instance;
 
   void _submitAuthForm() async {
     final email = _emailController.text.trim();
