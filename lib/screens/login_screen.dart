@@ -19,17 +19,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (isLogin) {
-        await _auth.signInWithEmailAndPassword(
-            email: email, password: password);
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
       } else {
-        await _auth.createUserWithEmailAndPassword(
-            email: email, password: password);
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
       }
+
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => HomeScreen()));
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException => \\${e.code}: \\${e.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Auth error')),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      print('Generic Exception => \\${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unexpected error occurred')),
+      );
     }
   }
 
