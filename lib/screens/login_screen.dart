@@ -16,33 +16,52 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    try {
-      if (isLogin) {
+    if (isLogin) {
+      try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
-      } else {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => HomeScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        print('FirebaseAuthException => \\${e.code}: \\${e.message}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Auth error')),
+        );
+      } catch (e) {
+        print('Generic Exception => \\${e}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unexpected error occurred')),
+        );
+      }
+    } else {
+      try {
+        final userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
-      }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      print('FirebaseAuthException => \\${e.code}: \\${e.message}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Auth error')),
-      );
-    } catch (e) {
-      print('Generic Exception => \\${e}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error occurred')),
-      );
+        print("✅ Sign up success: \\${userCredential.user?.uid}");
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => HomeScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        print("❌ FirebaseAuthException: \\${e.code} - \\${e.message}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "Firebase error")),
+        );
+      } catch (e) {
+        print("❌ Unknown error: \\${e}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Unexpected error occurred")),
+        );
+      }
     }
   }
 
