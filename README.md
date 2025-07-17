@@ -1,6 +1,6 @@
 # habithero
 
-A new Flutter project- trace your habits.
+A new Flutter project- track your habits.
 
 
 ## Getting Started
