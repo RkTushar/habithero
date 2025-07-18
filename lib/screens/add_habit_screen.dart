@@ -8,15 +8,25 @@ class AddHabitScreen extends StatefulWidget {
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
-  final _habitController = TextEditingController();
+  final TextEditingController _habitController = TextEditingController();
   String _frequency = 'Daily';
 
   void _saveHabit() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not logged in')),
+      );
+      return;
+    }
 
     final habitName = _habitController.text.trim();
-    if (habitName.isEmpty) return;
+    if (habitName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a habit name')),
+      );
+      return;
+    }
 
     await FirebaseFirestore.instance
         .collection('users')
@@ -28,31 +38,76 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       'createdAt': Timestamp.now(),
     });
 
-    Navigator.pop(context); // Go back to habit list
+    Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _habitController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Habit")),
-      body: Padding(
+      appBar: AppBar(title: Text("Add New Habit")),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _habitController,
-              decoration: InputDecoration(labelText: 'Habit Name'),
+        child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _habitController,
+                  decoration: InputDecoration(
+                    labelText: 'Habit Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _frequency,
+                  decoration: InputDecoration(
+                    labelText: 'Frequency',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  items: ['Daily', 'Weekly', 'Monthly'].map((f) {
+                    return DropdownMenuItem(
+                      value: f,
+                      child: Text(f),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _frequency = val;
+                      });
+                    }
+                  },
+                ),
+                SizedBox(height: 30),
+                ElevatedButton.icon(
+                  onPressed: _saveHabit,
+                  icon: Icon(Icons.save),
+                  label: Text("Save Habit"),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            DropdownButton<String>(
-              value: _frequency,
-              onChanged: (val) => setState(() => _frequency = val!),
-              items: ['Daily', 'Weekly', 'Monthly'].map((f) {
-                return DropdownMenuItem(value: f, child: Text(f));
-              }).toList(),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: _saveHabit, child: Text('Save Habit')),
-          ],
+          ),
         ),
       ),
     );
