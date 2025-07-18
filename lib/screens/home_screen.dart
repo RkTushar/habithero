@@ -19,7 +19,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     if (user == null) {
       return Scaffold(
-        body: Center(child: Text("No user logged in.")),
+        body: Center(
+          child: Text("No user logged in.", style: TextStyle(fontSize: 18)),
+        ),
       );
     }
 
@@ -30,10 +32,10 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your Habits"),
+        title: const Text("HabitHero"),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () => _logout(context),
           ),
@@ -43,31 +45,44 @@ class HomeScreen extends StatelessWidget {
         stream: habitsRef.orderBy('createdAt', descending: true).snapshots(),
         builder: (ctx, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
-            return Center(child: Text("No habits yet! Add one."));
+            return const Center(
+              child: Text(
+                "No habits yet! Tap '+' to add one.",
+                style: TextStyle(fontSize: 16),
+              ),
+            );
           }
 
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder: (ctx, i) {
-              final data = docs[i].data() as Map<String, dynamic>;
+            itemBuilder: (ctx, index) {
+              final data = docs[index].data() as Map<String, dynamic>?;
+
+              final habitName = data?['name'] ?? 'Unnamed Habit';
+              final frequency = data?['frequency'] ?? 'No frequency set';
 
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Card(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 3,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
                   child: ListTile(
-                    leading: Icon(Icons.check_circle_outline),
-                    title: Text(data['name'] ?? 'Unnamed Habit'),
-                    subtitle: Text(data['frequency'] ?? 'No frequency'),
+                    leading: const Icon(Icons.check_circle_outline,
+                        color: Colors.green),
+                    title: Text(
+                      habitName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(frequency),
                   ),
                 ),
               );
@@ -76,12 +91,14 @@ class HomeScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AddHabitScreen()),
-        ),
-        child: Icon(Icons.add),
-        tooltip: 'Add Habit',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddHabitScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Add New Habit',
       ),
     );
   }
