@@ -35,6 +35,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           // Reset loading state before navigation
           setState(() => _isLoading = false);
 
+          // Show success message and navigate back
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Habit added successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
           // Navigate back after successful save
           Navigator.pop(context);
         } else {
