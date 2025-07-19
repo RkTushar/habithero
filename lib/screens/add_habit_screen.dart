@@ -33,10 +33,17 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           });
 
           Navigator.pop(context); // ✅ Go back to HomeScreen
+        } else {
+          // Show error if user is not logged in
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('User not logged in')),
+          );
         }
       } catch (e) {
         print('Error adding habit: $e');
-        // Optional: show error dialog/snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save habit: $e')),
+        );
       } finally {
         setState(() => _isLoading = false);
       }
