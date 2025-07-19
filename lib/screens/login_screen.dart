@@ -66,40 +66,227 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(isLogin ? 'Login' : 'Sign Up')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-            ),
-            SizedBox(height: 20),
-            _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _submitAuthForm,
-                    child: Text(isLogin ? 'Login' : 'Sign Up'),
+      backgroundColor: Colors.grey[50],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue[600]!, Colors.blue[400]!, Colors.blue[200]!],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                // Header Section
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.fitness_center,
+                          size: 60,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        "HabitHero",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        isLogin ? "Welcome back!" : "Start your journey",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                   ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  isLogin = !isLogin;
-                });
-              },
-              child: Text(
-                  isLogin ? 'Create new account' : 'I already have an account'),
+                ),
+
+                // Login Form Card
+                Container(
+                  margin: EdgeInsets.only(top: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          isLogin ? "Sign In" : "Create Account",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 32),
+
+                        // Email Field
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'Enter your email',
+                            prefixIcon:
+                                Icon(Icons.email, color: Colors.blue[600]),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                  color: Colors.blue[600]!, width: 2),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+                        // Password Field
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            hintText: 'Enter your password',
+                            prefixIcon:
+                                Icon(Icons.lock, color: Colors.blue[600]),
+                            suffixIcon: Icon(Icons.visibility_off,
+                                color: Colors.grey[400]),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                  color: Colors.blue[600]!, width: 2),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
+                          ),
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                        ),
+                        SizedBox(height: 32),
+
+                        // Submit Button
+                        _isLoading
+                            ? Container(
+                                height: 56,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue[600]!),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                height: 56,
+                                child: ElevatedButton.icon(
+                                  onPressed: _submitAuthForm,
+                                  icon: Icon(
+                                    isLogin ? Icons.login : Icons.person_add,
+                                    color: Colors.white,
+                                  ),
+                                  label: Text(
+                                    isLogin ? "Sign In" : "Sign Up",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue[600],
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    elevation: 8,
+                                    shadowColor: Colors.blue.withOpacity(0.3),
+                                  ),
+                                ),
+                              ),
+                        SizedBox(height: 24),
+
+                        // Toggle Button
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isLogin = !isLogin;
+                            });
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: Colors.grey[600]),
+                              children: [
+                                TextSpan(
+                                  text: isLogin
+                                      ? "Don't have an account? "
+                                      : "Already have an account? ",
+                                ),
+                                TextSpan(
+                                  text: isLogin ? "Sign Up" : "Sign In",
+                                  style: TextStyle(
+                                    color: Colors.blue[600],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
