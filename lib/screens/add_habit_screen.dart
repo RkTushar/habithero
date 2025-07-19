@@ -8,51 +8,38 @@ class AddHabitScreen extends StatefulWidget {
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _habitController = TextEditingController();
   String _frequency = 'Daily';
   bool _isLoading = false;
 
   void _saveHabit() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User not logged in')),
-      );
-      return;
-    }
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
 
-    final habitName = _habitController.text.trim();
-    if (habitName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a habit name')),
-      );
-      return;
-    }
+      try {
+        final user = FirebaseAuth.instance.currentUser;
 
-    setState(() => _isLoading = true);
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('habits')
+              .add({
+            'name': _habitController.text.trim(),
+            'frequency': _frequency,
+            'createdAt': Timestamp.now(),
+            'completedDates': [], // initialize empty
+          });
 
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('habits')
-          .add({
-        'name': habitName,
-        'frequency': _frequency,
-        'createdAt': Timestamp.now(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Habit added successfully!')),
-      );
-
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save habit')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
+          Navigator.pop(context); // ✅ Go back to HomeScreen
+        }
+      } catch (e) {
+        print('Error adding habit: $e');
+        // Optional: show error dialog/snackbar
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -74,56 +61,65 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _habitController,
-                  maxLength: 50,
-                  decoration: InputDecoration(
-                    labelText: 'Habit Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _habitController,
+                    maxLength: 50,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a habit name';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Habit Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: _frequency,
-                  decoration: InputDecoration(
-                    labelText: 'Frequency',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: _frequency,
+                    decoration: InputDecoration(
+                      labelText: 'Frequency',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
+                    items: ['Daily', 'Weekly', 'Monthly'].map((f) {
+                      return DropdownMenuItem(
+                        value: f,
+                        child: Text(f),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _frequency = val;
+                        });
+                      }
+                    },
                   ),
-                  items: ['Daily', 'Weekly', 'Monthly'].map((f) {
-                    return DropdownMenuItem(
-                      value: f,
-                      child: Text(f),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() {
-                        _frequency = val;
-                      });
-                    }
-                  },
-                ),
-                SizedBox(height: 30),
-                _isLoading
-                    ? CircularProgressIndicator()
-                    : ElevatedButton.icon(
-                        onPressed: _saveHabit,
-                        icon: Icon(Icons.save),
-                        label: Text("Save Habit"),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: 30),
+                  _isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton.icon(
+                          onPressed: _saveHabit,
+                          icon: Icon(Icons.save),
+                          label: Text("Save Habit"),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
