@@ -15,6 +15,34 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  void _confirmDelete(BuildContext context, String docId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Delete Habit"),
+        content: const Text("Are you sure you want to delete this habit?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user!.uid)
+                  .collection('habits')
+                  .doc(docId)
+                  .delete();
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (user == null) {
@@ -83,6 +111,7 @@ class HomeScreen extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(frequency),
+                    onLongPress: () => _confirmDelete(context, docs[index].id),
                   ),
                 ),
               );
