@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -15,32 +16,23 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, String docId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Delete Habit"),
-        content: const Text("Are you sure you want to delete this habit?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user!.uid)
-                  .collection('habits')
-                  .doc(docId)
-                  .delete();
-            },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  String getTodayDate() {
+    return DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  Future<void> _toggleHabitCompletion(
+      DocumentReference habitRef, List completedDates) async {
+    final today = getTodayDate();
+
+    if (completedDates.contains(today)) {
+      // Uncheck today's completion
+      completedDates.remove(today);
+    } else {
+      // Add today's date
+      completedDates.add(today);
+    }
+
+    await habitRef.update({'completedDates': completedDates});
   }
 
   @override
@@ -94,6 +86,12 @@ class HomeScreen extends StatelessWidget {
 
               final habitName = data?['name'] ?? 'Unnamed Habit';
               final frequency = data?['frequency'] ?? 'No frequency set';
+              final completedDates =
+                  List<String>.from(data?['completedDates'] ?? []);
+              final today = getTodayDate();
+              final isCompletedToday = completedDates.contains(today);
+
+              final habitRef = docs[index].reference;
 
               return Padding(
                 padding:
@@ -104,14 +102,22 @@ class HomeScreen extends StatelessWidget {
                   ),
                   elevation: 4,
                   child: ListTile(
-                    leading: const Icon(Icons.check_circle_outline,
-                        color: Colors.green),
+                    leading: IconButton(
+                      icon: Icon(
+                        isCompletedToday
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        color: isCompletedToday ? Colors.green : Colors.grey,
+                      ),
+                      onPressed: () {
+                        _toggleHabitCompletion(habitRef, completedDates);
+                      },
+                    ),
                     title: Text(
                       habitName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(frequency),
-                    onLongPress: () => _confirmDelete(context, docs[index].id),
                   ),
                 ),
               );
