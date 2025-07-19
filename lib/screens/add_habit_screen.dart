@@ -32,7 +32,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             'completedDates': [], // initialize empty
           });
 
-          Navigator.pop(context); // ✅ Go back to HomeScreen
+          // Reset loading state before navigation
+          setState(() => _isLoading = false);
+
+          // Navigate back after successful save
+          Navigator.pop(context);
         } else {
           // Show error if user is not logged in
           ScaffoldMessenger.of(context).showSnackBar(
