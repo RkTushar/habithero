@@ -10,6 +10,7 @@ class AddHabitScreen extends StatefulWidget {
 class _AddHabitScreenState extends State<AddHabitScreen> {
   final TextEditingController _habitController = TextEditingController();
   String _frequency = 'Daily';
+  bool _isLoading = false;
 
   void _saveHabit() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -28,17 +29,31 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('habits')
-        .add({
-      'name': habitName,
-      'frequency': _frequency,
-      'createdAt': Timestamp.now(),
-    });
+    setState(() => _isLoading = true);
 
-    Navigator.pop(context);
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('habits')
+          .add({
+        'name': habitName,
+        'frequency': _frequency,
+        'createdAt': Timestamp.now(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Habit added successfully!')),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save habit')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -54,8 +69,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -63,6 +77,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               children: [
                 TextField(
                   controller: _habitController,
+                  maxLength: 50,
                   decoration: InputDecoration(
                     labelText: 'Habit Name',
                     border: OutlineInputBorder(
@@ -94,17 +109,19 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   },
                 ),
                 SizedBox(height: 30),
-                ElevatedButton.icon(
-                  onPressed: _saveHabit,
-                  icon: Icon(Icons.save),
-                  label: Text("Save Habit"),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton.icon(
+                        onPressed: _saveHabit,
+                        icon: Icon(Icons.save),
+                        label: Text("Save Habit"),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
               ],
             ),
           ),
