@@ -31,5 +31,5 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 
 1. **Clone the Repo**
    ```bash
-   git clone https://github.com/yourusername/habithero.git
+   git clone https://github.com/RkTushar/habithero.git
    cd habithero
