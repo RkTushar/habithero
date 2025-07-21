@@ -49,4 +49,14 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 4. **Run the Apps**
    ```bash
    flutter run
-
+5. **📁 Folder Structure**
+   ```bash
+   lib/
+   │
+   ├── main.dart               # Entry point
+   ├── login_screen.dart       # Login & registration
+   ├── home_screen.dart        # Habit list screen
+   ├── add_habit_screen.dart   # Add new habit UI
+6. **Run the Apps**
+   ```bash
+   flutter run
