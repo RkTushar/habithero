@@ -33,3 +33,20 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
    ```bash
    git clone https://github.com/RkTushar/habithero.git
    cd habithero
+2. **Install Dependencies**
+   ```bash
+   flutter pub get
+3. **Connect Firebase**
+   Create a project in Firebase Console
+
+   Add Android & Web apps to it
+
+   Download the google-services.json file and place it in android/app/
+
+   Enable Email/Password in Firebase Authentication
+
+   Set up Firestore database rules for user access
+4. **Run the Apps**
+   ```bash
+   flutter run
+
