@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
+import 'habit_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -153,6 +154,17 @@ class HomeScreen extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(frequency),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HabitDetailScreen(
+                              habitId: docId,
+                              habitName: habitName,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
