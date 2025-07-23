@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
 import 'habit_detail_screen.dart';
+import 'habit_history_screen.dart' hide HabitDetailScreen;
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -77,6 +78,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("HabitHero"),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'View Habit History',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => HabitHistoryScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
