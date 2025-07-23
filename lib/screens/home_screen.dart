@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
 import 'habit_detail_screen.dart';
@@ -29,32 +30,23 @@ class HomeScreen extends StatelessWidget {
   ) async {
     final today = getTodayDate();
     final updatedSet = Set<String>.from(completedDates);
+    final isCompleted = updatedSet.contains(today);
 
-    final isAlreadyCompleted = updatedSet.contains(today);
-    if (isAlreadyCompleted) {
-      updatedSet.remove(today);
-    } else {
-      updatedSet.add(today);
-    }
+    isCompleted ? updatedSet.remove(today) : updatedSet.add(today);
 
     try {
       await habitRef.update({'completedDates': updatedSet.toList()});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isAlreadyCompleted
-                ? "Marked as not done for today"
-                : "Habit marked as done!",
-          ),
+          content: Text(isCompleted
+              ? "Marked as not done for today"
+              : "Habit marked as done!"),
           duration: Duration(seconds: 2),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to update habit."),
-          duration: Duration(seconds: 2),
-        ),
+        SnackBar(content: Text("Failed to update habit.")),
       );
     }
   }
@@ -63,9 +55,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     if (user == null) {
       return Scaffold(
-        body: Center(
-          child: Text("No user logged in.", style: TextStyle(fontSize: 18)),
-        ),
+        body: Center(child: Text("No user logged in.")),
       );
     }
 
@@ -80,7 +70,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
-            tooltip: 'View Habit History',
+            tooltip: 'Habit History',
             onPressed: () {
               Navigator.push(
                 context,
@@ -124,15 +114,15 @@ class HomeScreen extends StatelessWidget {
             return ListView.builder(
               itemCount: docs.length,
               itemBuilder: (ctx, index) {
-                final data = docs[index].data() as Map<String, dynamic>?;
-                final docId = docs[index].id;
+                final doc = docs[index];
+                final data = doc.data() as Map<String, dynamic>;
+                final docId = doc.id;
                 final habitRef = habitsRef.doc(docId);
 
-                final habitName = data?['name'] ?? 'Unnamed Habit';
-                final frequency = data?['frequency'] ?? 'No frequency set';
+                final habitName = data['name'] ?? 'Unnamed Habit';
+                final frequency = data['frequency'] ?? 'Not specified';
                 final completedDates =
-                    List<String>.from(data?['completedDates'] ?? []);
-
+                    List<String>.from(data['completedDates'] ?? []);
                 final today = getTodayDate();
                 final isCompletedToday = completedDates.contains(today);
 
@@ -153,8 +143,8 @@ class HomeScreen extends StatelessWidget {
                           color: isCompletedToday ? Colors.green : Colors.grey,
                         ),
                         tooltip: isCompletedToday
-                            ? 'Mark as not done'
-                            : 'Mark as done',
+                            ? "Mark as not done"
+                            : "Mark as done",
                         onPressed: () {
                           _toggleHabitCompletion(
                               context, habitRef, completedDates);
@@ -162,9 +152,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                       title: Text(
                         habitName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      subtitle: Text(frequency),
+                      subtitle: Text("Frequency: $frequency"),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -185,6 +176,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Add New Habit',
         onPressed: () {
           Navigator.push(
             context,
@@ -192,7 +184,6 @@ class HomeScreen extends StatelessWidget {
           );
         },
         child: const Icon(Icons.add),
-        tooltip: 'Add New Habit',
       ),
     );
   }
