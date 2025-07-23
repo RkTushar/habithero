@@ -19,7 +19,7 @@ class HabitDetailScreen extends StatefulWidget {
 
 class _HabitDetailScreenState extends State<HabitDetailScreen> {
   late DateTime _focusedDay;
-  Set<DateTime> _completedDays = {};
+  final Set<DateTime> _completedDays = {};
   int get _totalCompletions => _completedDays.length;
 
   @override
@@ -29,60 +29,73 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     _loadCompletedDates();
   }
 
+  DateTime _normalizeDate(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
   Future<void> _loadCompletedDates() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('habits')
-        .doc(widget.habitId)
-        .get();
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
 
-    final data = snapshot.data();
-    if (data == null) return;
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('habits')
+          .doc(widget.habitId)
+          .get();
 
-    List<dynamic> rawDates = data['completedDates'] ?? [];
+      final data = snapshot.data();
+      if (data == null || data['completedDates'] == null) return;
 
-    setState(() {
-      _completedDays = rawDates
-          .map((ts) => (ts as Timestamp).toDate())
-          .map((date) => DateTime(date.year, date.month, date.day))
-          .toSet();
-    });
+      final List<dynamic> rawDates = data['completedDates'];
+
+      setState(() {
+        _completedDays.addAll(
+          rawDates.map((ts) => (ts as Timestamp).toDate()).map(_normalizeDate),
+        );
+      });
+    } catch (e) {
+      debugPrint("Error loading completed dates: $e");
+    }
   }
 
   Future<void> _toggleCompletion(DateTime day) async {
-    final normalizedDay = DateTime(day.year, day.month, day.day);
-    final isCompleted = _completedDays.contains(normalizedDay);
-    final userDoc = FirebaseFirestore.instance
+    final normalizedDay = _normalizeDate(day);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final habitDoc = FirebaseFirestore.instance
         .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(uid)
         .collection('habits')
         .doc(widget.habitId);
 
+    final isCompleted = _completedDays.contains(normalizedDay);
+
     setState(() {
-      if (isCompleted) {
-        _completedDays.remove(normalizedDay);
-      } else {
-        _completedDays.add(normalizedDay);
-      }
+      isCompleted
+          ? _completedDays.remove(normalizedDay)
+          : _completedDays.add(normalizedDay);
     });
 
-    await userDoc.update({
-      'completedDates':
-          _completedDays.map((d) => Timestamp.fromDate(d)).toList(),
-    });
+    try {
+      await habitDoc.update({
+        'completedDates': _completedDays.map(Timestamp.fromDate).toList(),
+      });
+    } catch (e) {
+      debugPrint("Error updating completion status: $e");
+    }
   }
 
-  bool _isCompleted(DateTime day) {
-    final normalizedDay = DateTime(day.year, day.month, day.day);
-    return _completedDays.contains(normalizedDay);
-  }
+  bool _isCompleted(DateTime day) =>
+      _completedDays.contains(_normalizeDate(day));
 
   void _showDayDialog(DateTime day) {
     final completed = _isCompleted(day);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text(
           completed ? 'Mark as Incomplete?' : 'Mark as Completed?',
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -94,17 +107,96 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
               await _toggleCompletion(day);
             },
             child: Text(completed ? 'Unmark' : 'Mark Completed'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.deepPurple.shade50,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.habitName,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Total completions: $_totalCompletions',
+              style: const TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendar() {
+    return TableCalendar(
+      firstDay: DateTime.utc(2023, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDay,
+      calendarFormat: CalendarFormat.month,
+      selectedDayPredicate: _isCompleted,
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _focusedDay = focusedDay;
+        });
+        _showDayDialog(selectedDay);
+      },
+      calendarStyle: CalendarStyle(
+        todayDecoration: const BoxDecoration(
+          color: Colors.blueAccent,
+          shape: BoxShape.circle,
+        ),
+        selectedDecoration: BoxDecoration(
+          color: Colors.green.shade400,
+          shape: BoxShape.circle,
+        ),
+        weekendTextStyle: const TextStyle(color: Colors.redAccent),
+        outsideDaysVisible: false,
+      ),
+      calendarBuilders: CalendarBuilders(
+        defaultBuilder: (context, day, focusedDay) {
+          if (_isCompleted(day)) {
+            return Container(
+              margin: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.green.shade400,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                '${day.day}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }
+          return null;
+        },
       ),
     );
   }
@@ -117,92 +209,14 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         backgroundColor: Colors.deepPurple,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                color: Colors.deepPurple.shade50,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.habitName,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Total completions: $_totalCompletions',
-                        style: const TextStyle(
-                            fontSize: 16, color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              TableCalendar(
-                firstDay: DateTime.utc(2023, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                calendarFormat: CalendarFormat.month,
-                calendarStyle: CalendarStyle(
-                  todayDecoration: const BoxDecoration(
-                    color: Colors.blueAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.green.shade400,
-                    shape: BoxShape.circle,
-                  ),
-                  markerDecoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                    shape: BoxShape.circle,
-                  ),
-                  weekendTextStyle: const TextStyle(color: Colors.redAccent),
-                  outsideDaysVisible: false,
-                ),
-                selectedDayPredicate: _isCompleted,
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _focusedDay = focusedDay;
-                  });
-                  _showDayDialog(selectedDay);
-                },
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, focusedDay) {
-                    if (_isCompleted(day)) {
-                      return Container(
-                        margin: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade400,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${day.day}',
-                          style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      );
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildSummaryCard(),
+            const SizedBox(height: 24),
+            _buildCalendar(),
+          ],
         ),
       ),
     );
