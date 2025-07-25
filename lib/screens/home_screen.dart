@@ -121,14 +121,12 @@ class HomeScreen extends StatelessWidget {
 
                 final habitName = data['name'] ?? 'Unnamed Habit';
                 final frequency = data['frequency'] ?? 'Not specified';
-                final completedDates =
-                    List<String>.from(data['completedDates'] ?? []);
+                final completedDates = List<String>.from(data['completedDates'] ?? []);
                 final today = getTodayDate();
                 final isCompletedToday = completedDates.contains(today);
 
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -142,9 +140,8 @@ class HomeScreen extends StatelessWidget {
                               : Icons.radio_button_unchecked,
                           color: isCompletedToday ? Colors.green : Colors.grey,
                         ),
-                        tooltip: isCompletedToday
-                            ? "Mark as not done"
-                            : "Mark as done",
+                        tooltip:
+                            isCompletedToday ? "Mark as not done" : "Mark as done",
                         onPressed: () {
                           _toggleHabitCompletion(
                               context, habitRef, completedDates);
