@@ -43,6 +43,25 @@ class _HabitCardState extends State<HabitCard> {
     widget.onUpdate(); // refresh UI from Home
   }
 
+  int calculateStreak(List completedDates) {
+    final today = DateTime.now();
+    int streak = 0;
+
+    for (int i = 0; i < completedDates.length; i++) {
+      final dateStr = completedDates[completedDates.length - 1 - i];
+      final date = DateTime.parse(dateStr);
+      final expectedDate = today.subtract(Duration(days: i));
+
+      if (DateUtils.dateOnly(date) == DateUtils.dateOnly(expectedDate)) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
   @override
   Widget build(BuildContext context) {
     final habitName = widget.habit['name'] ?? '';
@@ -50,6 +69,8 @@ class _HabitCardState extends State<HabitCard> {
     return Card(
       child: ListTile(
         title: Text(habitName),
+        subtitle:
+            Text('Streak:  [1m [32m [0m${calculateStreak(completedDates)}'),
         trailing: IconButton(
           icon: Icon(
             isCompletedToday()
