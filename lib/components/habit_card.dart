@@ -69,8 +69,8 @@ class _HabitCardState extends State<HabitCard> {
     return Card(
       child: ListTile(
         title: Text(habitName),
-        subtitle:
-            Text('Streak:  [1m [32m [0m${calculateStreak(completedDates)}'),
+        subtitle: Text(
+            "🔥 Streak:  [1m [32m [0m${calculateStreak(completedDates)} days"),
         trailing: IconButton(
           icon: Icon(
             isCompletedToday()
