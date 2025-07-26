@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../services/notification_service.dart';
 
 class AddHabitScreen extends StatefulWidget {
   @override
@@ -31,6 +33,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             'createdAt': Timestamp.now(),
             'completedDates': [], // initialize empty
           });
+
+          // Set up daily reminder notification
+          await NotificationService.showDailyReminder(
+            id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            title: 'Habit Reminder',
+            body: 'Don\'t forget to complete: ${_habitController.text.trim()}',
+            hour: 20,
+            minute: 0, // 8:00 PM daily
+          );
 
           // Reset loading state before navigation
           setState(() => _isLoading = false);
