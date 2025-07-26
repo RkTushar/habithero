@@ -17,13 +17,14 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
-    required Time time,
+    required int hour,
+    required int minute,
   }) async {
     await _notifications.zonedSchedule(
       id,
       title,
       body,
-      _scheduleDaily(time),
+      _scheduleDaily(hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
             'daily_channel', 'Daily Notifications',
@@ -36,10 +37,10 @@ class NotificationService {
     );
   }
 
-  static tz.TZDateTime _scheduleDaily(Time time) {
+  static tz.TZDateTime _scheduleDaily(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
-    final scheduled = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, time.hour, time.minute);
+    final scheduled =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     return scheduled.isBefore(now)
         ? scheduled.add(Duration(days: 1))
         : scheduled;
