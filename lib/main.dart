@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'services/notification_service.dart';
@@ -17,10 +18,10 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ThemeService(
-      child: Builder(
-        builder: (context) {
-          final themeService = ThemeService.of(context);
+    return ChangeNotifierProvider(
+      create: (_) => ThemeService.instance,
+      child: Consumer<ThemeService>(
+        builder: (context, themeService, child) {
           return MaterialApp(
             title: 'HabitHero',
             debugShowCheckedModeBanner: false,
