@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
     _initializeNotifications();
   }
 
@@ -62,11 +65,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
+    final scheduledTZDate = tz.TZDateTime.from(scheduledDate, tz.local);
+
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       habitId.hashCode, // Unique ID per habit
       'Habit Reminder',
       'Time to complete "$habitName"',
-      scheduledDate.toUtc().add(const Duration(hours: 6)), // Adjust to UTC+6
+      scheduledTZDate,
       details,
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
