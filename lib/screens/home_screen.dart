@@ -24,17 +24,9 @@ class HomeScreen extends StatelessWidget {
     return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
 
-  String _formatTime(int hour, int minute) {
+  String _formatTime(BuildContext context, int hour, int minute) {
     final time = TimeOfDay(hour: hour, minute: minute);
-    final now = DateTime.now();
-    final dt = DateTime(
-        now.year, now.month, now.day, time.hour, time.minute);
-    final formatted = TimeOfDay.fromDateTime(dt).format(
-      const TimeOfDayFormat(
-        alwaysUse24HourFormat: false,
-      ).toMaterialLocalizations(const Locale('en', 'US')),
-    );
-    return formatted;
+    return time.format(context);
   }
 
   Future<void> _toggleHabitCompletion(
@@ -141,4 +133,85 @@ class HomeScreen extends StatelessWidget {
                 final doc = docs[index];
                 final data = doc.data() as Map<String, dynamic>;
                 final docId = doc.id;
-                final hab
+                final habitRef = habitsRef.doc(docId);
+
+                final habitName = data['name'] ?? 'Unnamed Habit';
+                final frequency = data['frequency'] ?? 'Not specified';
+                final completedDates =
+                    List<String>.from(data['completedDates'] ?? []);
+                final reminderHour = data['reminderHour'] ?? 20;
+                final reminderMinute = data['reminderMinute'] ?? 0;
+
+                final today = getTodayDate();
+                final isCompletedToday = completedDates.contains(today);
+                final formattedTime =
+                    _formatTime(context, reminderHour, reminderMinute);
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(
+                          isCompletedToday
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          color: isCompletedToday ? Colors.green : Colors.grey,
+                        ),
+                        tooltip: isCompletedToday
+                            ? "Mark as not done"
+                            : "Mark as done",
+                        onPressed: () {
+                          _toggleHabitCompletion(
+                              context, habitRef, completedDates);
+                        },
+                      ),
+                      title: Text(
+                        habitName,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Frequency: $frequency"),
+                          Text("Reminder: $formattedTime"),
+                        ],
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HabitDetailScreen(
+                              habitId: docId,
+                              habitName: habitName,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add New Habit',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddHabitScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
