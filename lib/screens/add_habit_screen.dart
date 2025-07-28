@@ -1,321 +1,169 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class AddHabitScreen extends StatefulWidget {
+  const AddHabitScreen({Key? key}) : super(key: key);
+
   @override
-  _AddHabitScreenState createState() => _AddHabitScreenState();
+  State<AddHabitScreen> createState() => _AddHabitScreenState();
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _habitController = TextEditingController();
-  String _frequency = 'Daily';
-  bool _isLoading = false;
-
-  void _saveHabit() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      try {
-        final user = FirebaseAuth.instance.currentUser;
-
-        if (user != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection('habits')
-              .add({
-            'name': _habitController.text.trim(),
-            'frequency': _frequency,
-            'createdAt': Timestamp.now(),
-            'completedDates': [], // initialize empty
-          });
-
-          // Set up daily reminder notification
-          await NotificationService.showDailyReminder(
-            id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            title: 'Habit Reminder',
-            body: 'Don\'t forget to complete: ${_habitController.text.trim()}',
-            hour: 20,
-            minute: 0, // 8:00 PM daily
-          );
-
-          // Reset loading state before navigation
-          setState(() => _isLoading = false);
-
-          // Show success message and navigate back
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Habit added successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-
-          // Navigate back after successful save
-          Navigator.pop(context);
-        } else {
-          // Show error if user is not logged in
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('User not logged in')),
-          );
-        }
-      } catch (e) {
-        print('Error adding habit: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save habit: $e')),
-        );
-      } finally {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
+  final TextEditingController _habitNameController = TextEditingController();
+  TimeOfDay? _selectedTime;
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
-  void dispose() {
-    _habitController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _scheduleNotification(
+      String habitId, String habitName, TimeOfDay time) async {
+    final androidDetails = AndroidNotificationDetails(
+      'habit_channel',
+      'Habit Reminders',
+      channelDescription: 'Reminder notifications for your habits',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    final details = NotificationDetails(android: androidDetails);
+
+    final now = TimeOfDay.now();
+    final today = DateTime.now();
+    DateTime scheduledDate = DateTime(
+      today.year,
+      today.month,
+      today.day,
+      time.hour,
+      time.minute,
+    );
+
+    // If the selected time already passed today, schedule it for tomorrow
+    if (time.hour < now.hour ||
+        (time.hour == now.hour && time.minute <= now.minute)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      habitId.hashCode, // Unique ID per habit
+      'Habit Reminder',
+      'Time to complete "$habitName"',
+      scheduledDate.toUtc().add(const Duration(hours: 6)), // Adjust to UTC+6
+      details,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeats daily
+    );
+  }
+
+  Future<void> _saveHabit() async {
+    final habitName = _habitNameController.text.trim();
+    if (habitName.isEmpty || _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a habit and select a time')),
+      );
+      return;
+    }
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final docRef = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('habits')
+        .add({
+      'name': habitName,
+      'reminderHour': _selectedTime!.hour,
+      'reminderMinute': _selectedTime!.minute,
+      'completedDates': [],
+    });
+
+    await _scheduleNotification(docRef.id, habitName, _selectedTime!);
+
+    Navigator.pop(context); // Return to home screen
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(
-          "Add New Habit",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Colors.blue[600],
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        title: const Text('Add Habit'),
+        backgroundColor: Colors.deepPurple,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue[600]!, Colors.blue[400]!, Colors.blue[200]!],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _habitNameController,
+              decoration: const InputDecoration(
+                labelText: 'Habit Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                // Header Section
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.add_task,
-                        size: 60,
-                        color: Colors.white,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        "Create Your New Habit",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "Build better habits, one step at a time",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                ElevatedButton.icon(
+                  onPressed: _pickTime,
+                  icon: const Icon(Icons.access_time),
+                  label: const Text('Pick Reminder Time'),
                 ),
-
-                // Form Card
-                Container(
-                  margin: EdgeInsets.only(top: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Habit Name Field
-                          TextFormField(
-                            controller: _habitController,
-                            maxLength: 50,
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter a habit name';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'Habit Name',
-                              hintText: 'e.g., Exercise, Read, Meditate',
-                              prefixIcon:
-                                  Icon(Icons.edit, color: Colors.blue[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide:
-                                    BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide:
-                                    BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                    color: Colors.blue[600]!, width: 2),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                            ),
-                          ),
-
-                          SizedBox(height: 24),
-
-                          // Frequency Dropdown
-                          DropdownButtonFormField<String>(
-                            value: _frequency,
-                            decoration: InputDecoration(
-                              labelText: 'Frequency',
-                              prefixIcon: Icon(Icons.calendar_today,
-                                  color: Colors.blue[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide:
-                                    BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide:
-                                    BorderSide(color: Colors.grey[300]!),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                    color: Colors.blue[600]!, width: 2),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: 'Daily',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.today, color: Colors.blue[600]),
-                                    SizedBox(width: 12),
-                                    Text('Daily'),
-                                  ],
-                                ),
-                              ),
-                              DropdownMenuItem(
-                                value: 'Weekly',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.view_week,
-                                        color: Colors.blue[600]),
-                                    SizedBox(width: 12),
-                                    Text('Weekly'),
-                                  ],
-                                ),
-                              ),
-                              DropdownMenuItem(
-                                value: 'Monthly',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.calendar_month,
-                                        color: Colors.blue[600]),
-                                    SizedBox(width: 12),
-                                    Text('Monthly'),
-                                  ],
-                                ),
-                              ),
-                            ].toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() {
-                                  _frequency = val;
-                                });
-                              }
-                            },
-                          ),
-
-                          SizedBox(height: 32),
-
-                          // Save Button
-                          _isLoading
-                              ? Container(
-                                  height: 56,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.blue[600]!),
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  height: 56,
-                                  child: ElevatedButton.icon(
-                                    onPressed: _saveHabit,
-                                    icon: Icon(Icons.save, color: Colors.white),
-                                    label: Text(
-                                      "Save Habit",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue[600],
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      elevation: 8,
-                                      shadowColor: Colors.blue.withOpacity(0.3),
-                                    ),
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ),
-                  ),
+                const SizedBox(width: 12),
+                Text(
+                  _selectedTime != null
+                      ? _selectedTime!.format(context)
+                      : 'No time selected',
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _saveHabit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: const Text(
+                'Save Habit',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );
