@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
 import 'habit_detail_screen.dart';
 import 'habit_history_screen.dart' hide HabitDetailScreen;
 import 'profile_screen.dart';
+import '../services/theme_service.dart';
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -65,6 +67,8 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final habitsRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
@@ -74,6 +78,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("HabitHero"),
         actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.light_mode : Icons.dark_mode,
+              color: theme.appBarTheme.foregroundColor,
+            ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              context.read<ThemeService>().toggleTheme();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'Habit History',
@@ -102,9 +116,11 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
+            colors: isDark
+                ? [Color(0xFF1A1A2E), Color(0xFF16213E)]
+                : [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -119,10 +135,13 @@ class HomeScreen extends StatelessWidget {
             final docs = snapshot.data?.docs ?? [];
 
             if (docs.isEmpty) {
-              return const Center(
+              return Center(
                 child: Text(
                   "No habits yet! Tap '+' to add one.",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
                 ),
               );
             }
@@ -151,17 +170,15 @@ class HomeScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 4,
                     child: ListTile(
                       leading: IconButton(
                         icon: Icon(
                           isCompletedToday
                               ? Icons.check_circle
                               : Icons.radio_button_unchecked,
-                          color: isCompletedToday ? Colors.green : Colors.grey,
+                          color: isCompletedToday
+                              ? Colors.green
+                              : theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                         tooltip: isCompletedToday
                             ? "Mark as not done"
@@ -173,7 +190,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       title: Text(
                         habitName,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       subtitle: Column(
