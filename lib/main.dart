@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'screens/login_screen.dart'; // You'll create this
+import 'screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'services/notification_service.dart';
+import 'services/theme_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,10 +17,20 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HabitHero',
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+    return ThemeService(
+      child: Builder(
+        builder: (context) {
+          final themeService = ThemeService.of(context);
+          return MaterialApp(
+            title: 'HabitHero',
+            debugShowCheckedModeBanner: false,
+            theme: themeService.lightTheme,
+            darkTheme: themeService.darkTheme,
+            themeMode: themeService.themeMode,
+            home: LoginScreen(),
+          );
+        },
+      ),
     );
   }
 }
