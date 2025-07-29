@@ -50,11 +50,19 @@ class HomeScreen extends StatelessWidget {
               ? "Marked as not done for today"
               : "Habit marked as done!"),
           duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update habit.")),
+        SnackBar(
+          content: Text("Failed to update habit."),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     }
   }
@@ -75,13 +83,24 @@ class HomeScreen extends StatelessWidget {
         .collection('habits');
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text("HabitHero"),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          "HabitHero",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(
               isDark ? Icons.light_mode : Icons.dark_mode,
-              color: theme.appBarTheme.foregroundColor,
+              color: isDark ? Colors.white : Colors.black87,
             ),
             tooltip: 'Toggle Theme',
             onPressed: () {
@@ -89,7 +108,10 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.history),
+            icon: Icon(
+              Icons.history,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
             tooltip: 'Habit History',
             onPressed: () {
               Navigator.push(
@@ -99,7 +121,10 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: Icon(
+              Icons.person,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
             tooltip: 'Profile',
             onPressed: () {
               Navigator.push(
@@ -109,7 +134,10 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(
+              Icons.logout,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
             tooltip: 'Logout',
             onPressed: () => _logout(context),
           ),
@@ -119,115 +147,274 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isDark
-                ? [Color(0xFF1A1A2E), Color(0xFF16213E)]
-                : [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
+                ? [
+                    Color(0xFF0F0F23),
+                    Color(0xFF1A1A2E),
+                    Color(0xFF16213E),
+                  ]
+                : [
+                    Color(0xFF667eea),
+                    Color(0xFF764ba2),
+                    Color(0xFFf093fb),
+                  ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: habitsRef.orderBy('createdAt', descending: true).snapshots(),
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final docs = snapshot.data?.docs ?? [];
-
-            if (docs.isEmpty) {
-              return Center(
-                child: Text(
-                  "No habits yet! Tap '+' to add one.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              itemCount: docs.length,
-              itemBuilder: (ctx, index) {
-                final doc = docs[index];
-                final data = doc.data() as Map<String, dynamic>;
-                final docId = doc.id;
-                final habitRef = habitsRef.doc(docId);
-
-                final habitName = data['name'] ?? 'Unnamed Habit';
-                final frequency = data['frequency'] ?? 'Not specified';
-                final completedDates =
-                    List<String>.from(data['completedDates'] ?? []);
-                final reminderHour = data['reminderHour'] ?? 20;
-                final reminderMinute = data['reminderMinute'] ?? 0;
-
-                final today = getTodayDate();
-                final isCompletedToday = completedDates.contains(today);
-                final formattedTime =
-                    _formatTime(context, reminderHour, reminderMinute);
-
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Card(
-                    child: ListTile(
-                      leading: IconButton(
-                        icon: Icon(
-                          isCompletedToday
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          color: isCompletedToday
-                              ? Colors.green
-                              : theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                        tooltip: isCompletedToday
-                            ? "Mark as not done"
-                            : "Mark as done",
-                        onPressed: () {
-                          _toggleHabitCompletion(
-                              context, habitRef, completedDates);
-                        },
-                      ),
-                      title: Text(
-                        habitName,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Frequency: $frequency"),
-                          Text("Reminder: $formattedTime"),
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => HabitDetailScreen(
-                              habitId: docId,
-                              habitName: habitName,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+        child: SafeArea(
+          child: StreamBuilder<QuerySnapshot>(
+            stream:
+                habitsRef.orderBy('createdAt', descending: true).snapshots(),
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: isDark ? Colors.white : Colors.white,
                   ),
                 );
-              },
-            );
-          },
+              }
+
+              final docs = snapshot.data?.docs ?? [];
+
+              if (docs.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add_task,
+                        size: 80,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        "No habits yet!",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Tap the + button to create your first habit",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                      child: Text(
+                        "Your Habits",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (ctx, index) {
+                          final doc = docs[index];
+                          final data = doc.data() as Map<String, dynamic>;
+                          final docId = doc.id;
+                          final habitRef = habitsRef.doc(docId);
+
+                          final habitName = data['name'] ?? 'Unnamed Habit';
+                          final frequency =
+                              data['frequency'] ?? 'Not specified';
+                          final completedDates =
+                              List<String>.from(data['completedDates'] ?? []);
+                          final reminderHour = data['reminderHour'] ?? 20;
+                          final reminderMinute = data['reminderMinute'] ?? 0;
+
+                          final today = getTodayDate();
+                          final isCompletedToday =
+                              completedDates.contains(today);
+                          final formattedTime = _formatTime(
+                              context, reminderHour, reminderMinute);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.white.withOpacity(0.9),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => HabitDetailScreen(
+                                          habitId: docId,
+                                          habitName: habitName,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: isCompletedToday
+                                                ? Colors.green.withOpacity(0.2)
+                                                : Colors.grey.withOpacity(0.2),
+                                          ),
+                                          child: IconButton(
+                                            icon: Icon(
+                                              isCompletedToday
+                                                  ? Icons.check_circle
+                                                  : Icons
+                                                      .radio_button_unchecked,
+                                              color: isCompletedToday
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                              size: 28,
+                                            ),
+                                            onPressed: () {
+                                              _toggleHabitCompletion(context,
+                                                  habitRef, completedDates);
+                                            },
+                                          ),
+                                        ),
+                                        SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                habitName,
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                frequency,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                          .withOpacity(0.7)
+                                                      : Colors.black54,
+                                                ),
+                                              ),
+                                              SizedBox(height: 2),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.access_time,
+                                                    size: 14,
+                                                    color: isDark
+                                                        ? Colors.white
+                                                            .withOpacity(0.6)
+                                                        : Colors.black45,
+                                                  ),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    formattedTime,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: isDark
+                                                          ? Colors.white
+                                                              .withOpacity(0.6)
+                                                          : Colors.black45,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: isDark
+                                              ? Colors.white.withOpacity(0.5)
+                                              : Colors.black45,
+                                          size: 16,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: docs.length,
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: 100),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add New Habit',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddHabitScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 15,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          tooltip: 'Add New Habit',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddHabitScreen()),
+            );
+          },
+          backgroundColor: isDark ? Colors.white : Colors.white,
+          foregroundColor: isDark ? Colors.black : Colors.black,
+          elevation: 0,
+          child: Icon(Icons.add, size: 28),
+        ),
       ),
     );
   }
