@@ -391,85 +391,75 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: Container(
+      floatingActionButton: null,
+      floatingActionButtonLocation: null,
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 15,
-              offset: Offset(0, 8),
-            ),
-          ],
+          color: Colors.transparent,
         ),
-        child: FloatingActionButton(
-          tooltip: 'Add New Habit',
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => AddHabitScreen()),
-            );
-          },
-          backgroundColor: isDark ? Colors.white : Colors.white,
-          foregroundColor: isDark ? Colors.black : Colors.black,
-          elevation: 0,
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF667eea),
-                  Color(0xFF764ba2),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Outer ring
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                ),
-                // Inner circle with icon
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: Icon(
-                    Icons.star_rounded,
-                    color: Color(0xFF667eea),
-                    size: 24,
-                  ),
-                ),
-                // Small sparkle effect
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.yellow,
-                    ),
-                  ),
-                ),
+        child: Container(
+          width: double.infinity,
+          height: 56,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF667eea),
+                Color(0xFF764ba2),
               ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xFF667eea).withOpacity(0.3),
+                blurRadius: 12,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AddHabitScreen()),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                      child: Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      "Add Habit",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
