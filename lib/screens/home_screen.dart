@@ -391,79 +391,53 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: null,
-      floatingActionButtonLocation: null,
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(20),
+      floatingActionButton: Container(
         decoration: BoxDecoration(
-          color: Colors.transparent,
-        ),
-        child: Container(
-          width: double.infinity,
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF667eea),
-                Color(0xFF764ba2),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF667eea).withOpacity(0.4),
+              blurRadius: 12,
+              offset: Offset(0, 6),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0xFF667eea).withOpacity(0.3),
-                blurRadius: 12,
-                offset: Offset(0, 6),
-              ),
-            ],
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          tooltip: 'Add New Habit',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddHabitScreen()),
+            );
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          label: Text(
+            "Add Habit",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => AddHabitScreen()),
-                );
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.2),
-                      ),
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      "Add Habit",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          icon: Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.2),
+            ),
+            child: Icon(
+              Icons.add_rounded,
+              color: Colors.white,
+              size: 16,
             ),
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomNavigationBar: null,
     );
   }
 }
