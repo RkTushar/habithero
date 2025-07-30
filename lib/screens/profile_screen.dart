@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import '../services/theme_service.dart';
+import '../utils/transition_helper.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -12,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
+      createFadeRoute(LoginScreen()),
     );
   }
 
