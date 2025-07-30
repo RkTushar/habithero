@@ -109,7 +109,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         'reminderHour': _selectedTime!.hour,
         'reminderMinute': _selectedTime!.minute,
         'completedDates': [],
-        'createdAt': FieldValue.serverTimestamp(),
+        'createdAt': DateTime.now().toIso8601String(),
         'frequency': 'Daily', // Default frequency
       });
 
