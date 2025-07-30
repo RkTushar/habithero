@@ -90,7 +90,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
 
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not authenticated')),
+      );
+      return;
+    }
 
     final docRef = await FirebaseFirestore.instance
         .collection('users')
@@ -101,9 +106,20 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       'reminderHour': _selectedTime!.hour,
       'reminderMinute': _selectedTime!.minute,
       'completedDates': [],
+      'createdAt': FieldValue.serverTimestamp(),
+      'frequency': 'Daily', // Default frequency
     });
 
     await _scheduleNotification(docRef.id, habitName, _selectedTime!);
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Habit "$habitName" created successfully!'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
 
     Navigator.pop(context); // Return to home screen
   }
