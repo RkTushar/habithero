@@ -10,12 +10,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Suppress DevTools warnings for web
   if (kIsWeb) {
     // Ignore DevTools extension errors
   }
-  
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
