@@ -266,29 +266,44 @@ class HomeScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (ctx, index) {
-                          final doc = docs[index];
-                          final data = doc.data() as Map<String, dynamic>;
-                          final docId = doc.id;
-                          final habitRef = habitsRef.doc(docId);
+                                                 (ctx, index) {
+                           try {
+                             final doc = docs[index];
+                             final data = doc.data() as Map<String, dynamic>;
+                             final docId = doc.id;
+                             final habitRef = habitsRef.doc(docId);
 
-                          final habitName = data['name'] ?? 'Unnamed Habit';
-                          final frequency =
-                              data['frequency'] ?? 'Not specified';
-                                                     final completedDatesRaw = data['completedDates'];
-                           final completedDates = completedDatesRaw != null 
-                               ? List<String>.from(completedDatesRaw)
-                               : <String>[];
-                          final reminderHour = data['reminderHour'] ?? 20;
-                          final reminderMinute = data['reminderMinute'] ?? 0;
+                             final habitName = data['name'] ?? 'Unnamed Habit';
+                             final frequency =
+                                 data['frequency'] ?? 'Not specified';
+                             
+                             // Safely handle completedDates
+                             List<String> completedDates = <String>[];
+                             try {
+                               final completedDatesRaw = data['completedDates'];
+                               if (completedDatesRaw != null) {
+                                 if (completedDatesRaw is List) {
+                                   completedDates = completedDatesRaw
+                                       .where((item) => item is String)
+                                       .cast<String>()
+                                       .toList();
+                                 }
+                               }
+                             } catch (e) {
+                               // If there's an error parsing completedDates, use empty list
+                               completedDates = <String>[];
+                             }
+                             
+                             final reminderHour = data['reminderHour'] ?? 20;
+                             final reminderMinute = data['reminderMinute'] ?? 0;
 
-                          final today = getTodayDate();
-                          final isCompletedToday =
-                              completedDates.contains(today);
-                          final formattedTime = _formatTime(
-                              context, reminderHour, reminderMinute);
+                             final today = getTodayDate();
+                             final isCompletedToday =
+                                 completedDates.contains(today);
+                                                          final formattedTime = _formatTime(
+                                 context, reminderHour, reminderMinute);
 
-                          return Padding(
+                             return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Container(
                               decoration: BoxDecoration(
