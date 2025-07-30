@@ -5,6 +5,7 @@ import 'screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'services/notification_service.dart';
 import 'services/theme_service.dart';
+import 'utils/transition_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,15 @@ class MyApp extends StatelessWidget {
             darkTheme: themeService.darkTheme,
             themeMode: themeService.themeMode,
             home: LoginScreen(),
+            onGenerateRoute: (settings) {
+              // Use fade transition for all routes
+              switch (settings.name) {
+                case '/':
+                  return createFadeRoute(LoginScreen());
+                default:
+                  return createFadeRoute(LoginScreen());
+              }
+            },
           );
         },
       ),
