@@ -59,7 +59,7 @@ class HomeScreen extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to update habit."),
+          content: Text("Failed to update habit: ${e.toString()}"),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -275,8 +275,10 @@ class HomeScreen extends StatelessWidget {
                           final habitName = data['name'] ?? 'Unnamed Habit';
                           final frequency =
                               data['frequency'] ?? 'Not specified';
-                          final completedDates =
-                              List<String>.from(data['completedDates'] ?? []);
+                                                     final completedDatesRaw = data['completedDates'];
+                           final completedDates = completedDatesRaw != null 
+                               ? List<String>.from(completedDatesRaw)
+                               : <String>[];
                           final reminderHour = data['reminderHour'] ?? 20;
                           final reminderMinute = data['reminderMinute'] ?? 0;
 
