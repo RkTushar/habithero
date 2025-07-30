@@ -164,8 +164,7 @@ class HomeScreen extends StatelessWidget {
         ),
         child: SafeArea(
           child: StreamBuilder<QuerySnapshot>(
-            stream:
-                habitsRef.snapshots(),
+            stream: habitsRef.snapshots(),
             builder: (ctx, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
