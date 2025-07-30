@@ -97,31 +97,42 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       return;
     }
 
-    final docRef = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('habits')
-        .add({
-      'name': habitName,
-      'reminderHour': _selectedTime!.hour,
-      'reminderMinute': _selectedTime!.minute,
-      'completedDates': [],
-      'createdAt': FieldValue.serverTimestamp(),
-      'frequency': 'Daily', // Default frequency
-    });
+    try {
+      final docRef = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('habits')
+          .add({
+        'name': habitName,
+        'reminderHour': _selectedTime!.hour,
+        'reminderMinute': _selectedTime!.minute,
+        'completedDates': [],
+        'createdAt': FieldValue.serverTimestamp(),
+        'frequency': 'Daily', // Default frequency
+      });
 
-    await _scheduleNotification(docRef.id, habitName, _selectedTime!);
+      await _scheduleNotification(docRef.id, habitName, _selectedTime!);
 
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Habit "$habitName" created successfully!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Habit "$habitName" created successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
 
-    Navigator.pop(context); // Return to home screen
+      Navigator.pop(context); // Return to home screen
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to create habit: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   Future<void> _pickTime() async {
