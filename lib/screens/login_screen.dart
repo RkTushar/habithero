@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import '../services/theme_service.dart';
+import '../utils/transition_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
+        createFadeRoute(HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
