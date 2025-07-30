@@ -9,6 +9,7 @@ import 'habit_detail_screen.dart';
 import 'habit_history_screen.dart' hide HabitDetailScreen;
 import 'profile_screen.dart';
 import '../services/theme_service.dart';
+import '../utils/transition_helper.dart';
 
 class HomeScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -17,7 +18,7 @@ class HomeScreen extends StatelessWidget {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
+      createFadeRoute(LoginScreen()),
     );
   }
 
@@ -116,7 +117,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => HabitHistoryScreen()),
+                createSlideRoute(HabitHistoryScreen()),
               );
             },
           ),
@@ -129,7 +130,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => ProfileScreen()),
+                createSlideRoute(ProfileScreen()),
               );
             },
           ),
@@ -271,8 +272,8 @@ class HomeScreen extends StatelessWidget {
                                   onTap: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(
-                                        builder: (_) => HabitDetailScreen(
+                                      createSlideRoute(
+                                        HabitDetailScreen(
                                           habitId: docId,
                                           habitName: habitName,
                                         ),
@@ -407,7 +408,7 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => AddHabitScreen()),
+              createSlideRoute(AddHabitScreen()),
             );
           },
           backgroundColor: Colors.transparent,
