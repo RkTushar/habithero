@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'habit_detail_screen.dart';
+import '../utils/transition_helper.dart';
 
 class HabitHistoryScreen extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -50,8 +52,8 @@ class HabitHistoryScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => HabitDetailScreen(
+                    createSlideRoute(
+                      HabitDetailScreen(
                         habitId: habitId,
                         habitName: habitName,
                       ),
