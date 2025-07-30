@@ -6,9 +6,16 @@ import 'firebase_options.dart';
 import 'services/notification_service.dart';
 import 'services/theme_service.dart';
 import 'utils/transition_helper.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Suppress DevTools warnings for web
+  if (kIsWeb) {
+    // Ignore DevTools extension errors
+  }
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
