@@ -175,20 +175,20 @@ class HomeScreen extends StatelessWidget {
               }
 
               final docs = snapshot.data?.docs ?? [];
-              
+
               // Sort documents manually to handle both Timestamp and String createdAt
               docs.sort((a, b) {
                 final aData = a.data() as Map<String, dynamic>;
                 final bData = b.data() as Map<String, dynamic>;
-                
+
                 final aCreatedAt = aData['createdAt'];
                 final bCreatedAt = bData['createdAt'];
-                
+
                 // Handle null createdAt (old habits)
                 if (aCreatedAt == null && bCreatedAt == null) return 0;
                 if (aCreatedAt == null) return 1; // Put nulls at the end
                 if (bCreatedAt == null) return -1;
-                
+
                 // Handle Timestamp vs String comparison
                 if (aCreatedAt is Timestamp && bCreatedAt is Timestamp) {
                   return bCreatedAt.compareTo(aCreatedAt); // Descending
@@ -197,19 +197,19 @@ class HomeScreen extends StatelessWidget {
                 } else {
                   // Mixed types - convert both to DateTime for comparison
                   DateTime aDate, bDate;
-                  
+
                   if (aCreatedAt is Timestamp) {
                     aDate = aCreatedAt.toDate();
                   } else {
                     aDate = DateTime.parse(aCreatedAt);
                   }
-                  
+
                   if (bCreatedAt is Timestamp) {
                     bDate = bCreatedAt.toDate();
                   } else {
                     bDate = DateTime.parse(bCreatedAt);
                   }
-                  
+
                   return bDate.compareTo(aDate); // Descending
                 }
               });
