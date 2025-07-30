@@ -266,172 +266,194 @@ class HomeScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                                                 (ctx, index) {
-                           try {
-                             final doc = docs[index];
-                             final data = doc.data() as Map<String, dynamic>;
-                             final docId = doc.id;
-                             final habitRef = habitsRef.doc(docId);
+                        (ctx, index) {
+                          try {
+                            final doc = docs[index];
+                            final data = doc.data() as Map<String, dynamic>;
+                            final docId = doc.id;
+                            final habitRef = habitsRef.doc(docId);
 
-                             final habitName = data['name'] ?? 'Unnamed Habit';
-                             final frequency =
-                                 data['frequency'] ?? 'Not specified';
-                             
-                             // Safely handle completedDates
-                             List<String> completedDates = <String>[];
-                             try {
-                               final completedDatesRaw = data['completedDates'];
-                               if (completedDatesRaw != null) {
-                                 if (completedDatesRaw is List) {
-                                   completedDates = completedDatesRaw
-                                       .where((item) => item is String)
-                                       .cast<String>()
-                                       .toList();
-                                 }
-                               }
-                             } catch (e) {
-                               // If there's an error parsing completedDates, use empty list
-                               completedDates = <String>[];
-                             }
-                             
-                             final reminderHour = data['reminderHour'] ?? 20;
-                             final reminderMinute = data['reminderMinute'] ?? 0;
+                            final habitName = data['name'] ?? 'Unnamed Habit';
+                            final frequency =
+                                data['frequency'] ?? 'Not specified';
 
-                             final today = getTodayDate();
-                             final isCompletedToday =
-                                 completedDates.contains(today);
-                                                          final formattedTime = _formatTime(
-                                 context, reminderHour, reminderMinute);
+                            // Safely handle completedDates
+                            List<String> completedDates = <String>[];
+                            try {
+                              final completedDatesRaw = data['completedDates'];
+                              if (completedDatesRaw != null) {
+                                if (completedDatesRaw is List) {
+                                  completedDates = completedDatesRaw
+                                      .where((item) => item is String)
+                                      .cast<String>()
+                                      .toList();
+                                }
+                              }
+                            } catch (e) {
+                              // If there's an error parsing completedDates, use empty list
+                              completedDates = <String>[];
+                            }
 
-                             return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: isDark
-                                    ? Colors.white.withOpacity(0.1)
-                                    : Colors.white.withOpacity(0.9),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
+                            final reminderHour = data['reminderHour'] ?? 20;
+                            final reminderMinute = data['reminderMinute'] ?? 0;
+
+                            final today = getTodayDate();
+                            final isCompletedToday =
+                                completedDates.contains(today);
+                            final formattedTime = _formatTime(
+                                context, reminderHour, reminderMinute);
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Container(
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      createSlideRoute(
-                                        HabitDetailScreen(
-                                          habitId: docId,
-                                          habitName: habitName,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: isCompletedToday
-                                                ? Colors.green.withOpacity(0.2)
-                                                : Colors.grey.withOpacity(0.2),
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.1)
+                                      : Colors.white.withOpacity(0.9),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        createSlideRoute(
+                                          HabitDetailScreen(
+                                            habitId: docId,
+                                            habitName: habitName,
                                           ),
-                                          child: IconButton(
-                                            icon: Icon(
-                                              isCompletedToday
-                                                  ? Icons.check_circle
-                                                  : Icons
-                                                      .radio_button_unchecked,
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 60,
+                                            height: 60,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
                                               color: isCompletedToday
                                                   ? Colors.green
-                                                  : Colors.grey,
-                                              size: 28,
+                                                      .withOpacity(0.2)
+                                                  : Colors.grey
+                                                      .withOpacity(0.2),
                                             ),
-                                            onPressed: () {
-                                              _toggleHabitCompletion(context,
-                                                  habitRef, completedDates);
-                                            },
+                                            child: IconButton(
+                                              icon: Icon(
+                                                isCompletedToday
+                                                    ? Icons.check_circle
+                                                    : Icons
+                                                        .radio_button_unchecked,
+                                                color: isCompletedToday
+                                                    ? Colors.green
+                                                    : Colors.grey,
+                                                size: 28,
+                                              ),
+                                              onPressed: () {
+                                                _toggleHabitCompletion(context,
+                                                    habitRef, completedDates);
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                habitName,
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: isDark
-                                                      ? Colors.white
-                                                      : Colors.black87,
-                                                ),
-                                              ),
-                                              SizedBox(height: 4),
-                                              Text(
-                                                frequency,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: isDark
-                                                      ? Colors.white
-                                                          .withOpacity(0.7)
-                                                      : Colors.black54,
-                                                ),
-                                              ),
-                                              SizedBox(height: 2),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.access_time,
-                                                    size: 14,
+                                          SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  habitName,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
                                                     color: isDark
                                                         ? Colors.white
-                                                            .withOpacity(0.6)
-                                                        : Colors.black45,
+                                                        : Colors.black87,
                                                   ),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    formattedTime,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
+                                                ),
+                                                SizedBox(height: 4),
+                                                Text(
+                                                  frequency,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: isDark
+                                                        ? Colors.white
+                                                            .withOpacity(0.7)
+                                                        : Colors.black54,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 2),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.access_time,
+                                                      size: 14,
                                                       color: isDark
                                                           ? Colors.white
                                                               .withOpacity(0.6)
                                                           : Colors.black45,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                                    SizedBox(width: 4),
+                                                    Text(
+                                                      formattedTime,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: isDark
+                                                            ? Colors.white
+                                                                .withOpacity(
+                                                                    0.6)
+                                                            : Colors.black45,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: isDark
-                                              ? Colors.white.withOpacity(0.5)
-                                              : Colors.black45,
-                                          size: 16,
-                                        ),
-                                      ],
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            color: isDark
+                                                ? Colors.white.withOpacity(0.5)
+                                                : Colors.black45,
+                                            size: 16,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
+                            );
+                          } catch (e) {
+                            // Return a placeholder widget if there's an error processing the habit
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.red.withOpacity(0.1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Text(
+                                    'Error loading habit: ${e.toString()}',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
                         },
                         childCount: docs.length,
                       ),
