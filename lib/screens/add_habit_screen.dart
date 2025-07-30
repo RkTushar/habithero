@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'home_screen.dart';
+import '../utils/transition_helper.dart';
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({Key? key}) : super(key: key);
@@ -122,7 +124,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         ),
       );
 
-      Navigator.pop(context); // Return to home screen
+      // Navigate to home screen with fade transition
+      Navigator.pushReplacement(
+        context,
+        createFadeRoute(HomeScreen()),
+      );
     } catch (e) {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
