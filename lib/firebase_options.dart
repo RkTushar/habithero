@@ -50,7 +50,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: 'your-sender-id',
     projectId: 'habithero-e2f63',
     storageBucket: 'habithero-e2f63.appspot.com',
-    iosBundleId: 'com.example.habithero',
+    iosBundleId: 'com.tushar.habithero',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
