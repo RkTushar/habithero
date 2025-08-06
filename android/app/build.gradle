@@ -47,6 +47,13 @@ android {
         jvmTarget = '17'
     }
 
+    // Add Java toolchain configuration
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
