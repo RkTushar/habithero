@@ -37,9 +37,9 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-android-api-key',
-    appId: 'your-android-app-id',
-    messagingSenderId: 'your-sender-id',
+    apiKey: 'AIzaSyCfkWN0GvdL-A2qa1ibZARc9AMuvFiukrw',
+    appId: '1:1042646575861:android:61b098b6e5368a60d5b3bc',
+    messagingSenderId: '1042646575861',
     projectId: 'habithero-e2f63',
     storageBucket: 'habithero-e2f63.appspot.com',
   );
@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: 'your-sender-id',
     projectId: 'habithero-e2f63',
     storageBucket: 'habithero-e2f63.appspot.com',
-    iosBundleId: 'com.example.habithero',
+    iosBundleId: 'com.tushar.habithero',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
