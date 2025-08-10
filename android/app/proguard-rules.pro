@@ -31,3 +31,7 @@
 # Firebase rules
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; } 
+
+# Google Play rules
+-keep class com.google.android.play.** { *; }
+-dontwarn com.google.android.play.**
