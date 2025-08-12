@@ -41,7 +41,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 
    Add Android & Web apps to it
 
-   Download the google-services.json file and place it in android/app/
+   Download the Google-services.json file and place it in android/app/
 
    Enable Email/Password in Firebase Authentication
 
