@@ -25,7 +25,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 | Firebase Auth | User authentication system               |
 | Cloud Firestore | Realtime NoSQL database by Firebase     |
 
----
+--
 
 ## 🧪 How to Run Locally
 
