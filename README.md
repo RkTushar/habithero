@@ -61,13 +61,13 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 6. **To Do**
     Streak & Progress Visualization
 
- Habit Completion Toggle
+    Habit Completion Toggle
 
- Edit/Delete Habit Functionality
+    Edit/Delete Habit Functionality
 
- Dark Mode Support
+    Dark Mode Support
 
- Push Notifications
+    Push Notifications
 
  7. **License**
       This project is open source and available under the MIT License.
