@@ -10,6 +10,15 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+println "[signing] keystoreProperties.storeFile=${keystoreProperties['storeFile']}"
+def __keystorePath = keystoreProperties['storeFile']
+if (__keystorePath != null) {
+    def __keystoreFile = file(__keystorePath)
+    println "[signing] resolved keystore path=${__keystoreFile.absolutePath} exists=${__keystoreFile.exists()}"
+} else {
+    println "[signing] keystore path is null"
+}
+
 // Removed variable declarations that shadow Gradle DSL methods in signingConfigs
 
 def localProperties = new Properties()
