@@ -1,4 +1,4 @@
-# 📱 HabitHero -  Gamified Habit Tracker
+# 📱 HabitHero - A Gamified Habit Tracker
 
 HabitHero is a Flutter-based habit tracking application that helps users build better habits by tracking consistency and progress. It supports Firebase Authentication and Firestore for secure login and real-time data storage.
 
@@ -25,7 +25,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 | Firebase Auth | User authentication system               |
 | Cloud Firestore | Realtime NoSQL database by Firebase     |
 
----
+--
 
 ## 🧪 How to Run Locally
 
@@ -41,7 +41,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 
    Add Android & Web apps to it
 
-   Download the google-services.json file and place it in android/app/
+   Download the Google-services.json file and place it in android/app/
 
    Enable Email/Password in Firebase Authentication
 
@@ -57,16 +57,17 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
    ├── login_screen.dart       # Login & registration
    ├── home_screen.dart        # Habit list screen
    ├── add_habit_screen.dart   # Add new habit UI
+   
 6. **To Do**
     Streak & Progress Visualization
 
- Habit Completion Toggle
+    Habit Completion Toggle
 
- Edit/Delete Habit Functionality
+    Edit/Delete Habit Functionality
 
- Dark Mode Support
+    Dark Mode Support
 
- Push Notifications
+    Push Notifications
 
  7. **License**
       This project is open source and available under the MIT License.
