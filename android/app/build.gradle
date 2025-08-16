@@ -10,10 +10,7 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-def storePassword = keystoreProperties['storePassword']
-def keyPassword = keystoreProperties['keyPassword']
-def keyAlias = keystoreProperties['keyAlias']
-def storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+// Removed variable declarations that shadow Gradle DSL methods in signingConfigs
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
