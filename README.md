@@ -13,7 +13,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 - ☁️ Real-time Firestore database integration
 - 🚀 Smooth and clean Material UI
 - 🔒 Secure user-specific habit data
-
+  
 ---
 
 ## 🛠️ Tech Stack
@@ -49,6 +49,7 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 4. **Run the Apps**
    ```bash
    flutter run
+   
 5. **📁 Folder Structure**
    ```bash
    lib/
