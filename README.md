@@ -70,5 +70,4 @@ HabitHero is a Flutter-based habit tracking application that helps users build b
 
     Push Notifications
 
- 7. **License**
-      This project is open source and available under the MIT License.
+
